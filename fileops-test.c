@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "fileops.jhibbele.h"
+#include "fileops.amonks-mgohacki.h"
 
 // header will have 26 longs + 26 longs (one for each letter)
 
