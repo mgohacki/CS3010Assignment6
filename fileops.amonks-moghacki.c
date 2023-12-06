@@ -28,7 +28,7 @@ char *getWord(FILE *fp, char letter, int index){
 //    Suppose I want to read the second word starting with 'n'
 //    1. if the file is empty, there are no words starting with 'n'
 //    2. if the file is not empty, then read the header and look at header.counts[13]
-    FileHeader *header = malloc(sizeof(FileHeader));
+    FileHeader *header;
     fseek(fp, 0,SEEK_SET);
     fread(header, sizeof(FileHeader), 1, fp);
 //    3. if header.counts[13] less than two, then there is no second word starting with 'n'
@@ -37,18 +37,20 @@ char *getWord(FILE *fp, char letter, int index){
     }
 //    4. otherwise, look at header.startPositions[13]
     else{
-        WordRecord* word = malloc(sizeof(WordRecord));
-        for(int i = 0; i < header->counts; i++){
-            //    5. suppose that value is p : then fseek() to p , and read the WordRecord structure starting
-            //    at this position
-            fseek(fp, 0, header->startPositions[letter]);
 
-            word = fread(word, sizeof(WordRecord), 1, fp);
+        //    5. suppose that value is p : then fseek() to p , and read the WordRecord structure starting
+        //    at this position
+        fseek(fp, header->startPositions[letter], SEEK_SET);
+        for (int i =0; i< index;i++){
+            WordRecord* word;
             //    6. get the nextpos value from the record
+            fread(&word, sizeof(WordRecord), 1, fp);
             //    7. seek to nextpos
-            fseek(fp, 0, word->nextpos);
-            //    8. read the record at that position and get the word from that record
-
+            fseek(fp, word->nextpos, SEEK_SET);
         }
+        //    8. read the record at that position and get the word from that record
+        WordRecord* word;
+        fread(&word, sizeof(WordRecord), 1, fp);
+        return word->word;
     }
 }
