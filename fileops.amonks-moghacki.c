@@ -21,7 +21,15 @@ int insertWord(FILE *fp, char *word){
 }
 
 int countWords(FILE *fp, char letter, int *count){
-
+    FileHeader *header;
+    fseek(fp, 0,SEEK_SET);
+    fread(header, sizeof(FileHeader), 1, fp);
+    if (header->counts[letter] < 0){
+        return 0;
+    }
+    else{
+        return header->counts[letter];
+    }
 }
 
 char *getWord(FILE *fp, char letter, int index){
