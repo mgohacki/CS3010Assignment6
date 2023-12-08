@@ -3,6 +3,64 @@
 //
 #include "fileops.amonks-mgohacki.h"
 int insertWord(FILE *fp, char *word){
+    if (word == NULL || word[0] == '\0') {
+        return 1;
+    }
+    fseek(fp, 0, SEEK_END);
+    long filesize = ftell(fp);
+    FileHeader header;
+    if (filesize == 0) { // File is empty, write a new header
+        for (int i = 0; i < NUMLETTERS; i++) {
+            header.counts[i] = 0;
+            header.startPositions[i] = 0;
+        }
+        header.counts[word[0] - 'a'] = 1;
+        header.startPositions[word[0] - 'a'] = sizeof(FileHeader);
+        fseek(fp, 0, SEEK_SET);
+        fwrite(&header, sizeof(FileHeader), 1, fp);
+        WordRecord record;
+        strcpy(record.word, word);
+        record.nextpos = 0;
+        fseek(fp, sizeof(FileHeader), SEEK_SET);
+        fwrite(&record, sizeof(WordRecord), 1, fp);
+        return 0;
+    }
+    // File is not empty
+    fseek(fp, 0, SEEK_SET);
+    fread(&header, sizeof(FileHeader), 1, fp);
+    int index = word[0] - 'a'; //index of first char
+    header.counts[index]++;
+    if (header.counts[index] == 1) {// If this is the first word for this letter
+        header.startPositions[index] = filesize;
+        fseek(fp, 0, SEEK_SET);
+        fwrite(&header, sizeof(FileHeader), 1, fp);
+        WordRecord record;
+        strcpy(record.word, word);
+        record.nextpos = 0;
+        fseek(fp, 0, SEEK_END);
+        fwrite(&record, sizeof(WordRecord), 1, fp);
+
+    } else { //Not first word for the letter
+        long currentPosition = sizeof(FileHeader);
+        fseek(fp, header.startPositions[index], SEEK_SET);
+        WordRecord currentRecord;
+        fread(&currentRecord, sizeof(WordRecord), 1, fp);
+        while (currentRecord.nextpos != 0) { //update all of the nextpos
+            currentPosition = currentRecord.nextpos;
+            fseek(fp, currentRecord.nextpos, SEEK_SET);
+            fread(&currentRecord, sizeof(WordRecord), 1, fp);
+        }
+        currentRecord.nextpos = filesize;
+        fseek(fp, currentPosition, SEEK_SET);
+        fwrite(&currentRecord, sizeof(WordRecord), 1, fp);
+        WordRecord newRecord;
+        strcpy(newRecord.word, word);
+        newRecord.nextpos = 0;
+        fseek(fp, 0, SEEK_END);
+        fwrite(&newRecord, sizeof(WordRecord), 1, fp);
+    }
+    return 0;
+
 //    Suppose I want to write the word "kerfuffle" to the file
 //    1. if the file is empty
 //      1. write a new header with header.counts[10] = 1 and header.startPositions = sizeof(Header)
