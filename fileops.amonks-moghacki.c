@@ -7,7 +7,6 @@ int insertWord(FILE *fp, char *word){
         return 1;
     }
     if (checkWord(word) != 0) {
-        // The word contains non-alphabetic characters
         return 1;
     }
 
@@ -52,7 +51,7 @@ int insertWord(FILE *fp, char *word){
         fseek(fp, header.startPositions[index], SEEK_SET);
         WordRecord currentRecord;
         fread(&currentRecord, sizeof(WordRecord), 1, fp);
-        while (currentRecord.nextpos != 0) { //update all of the nextpos
+        while (currentRecord.nextpos != 0) { //read all records for given letter
             currentPosition = currentRecord.nextpos;
             fseek(fp, currentRecord.nextpos, SEEK_SET);
             fread(&currentRecord, sizeof(WordRecord), 1, fp);

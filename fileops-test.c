@@ -81,7 +81,10 @@ int writeTestOne(char *filename, char **existingWords[], int existingCounts[], i
     rc = insertWord(fp, buf);
     printf("rc = %d\n", rc);
   } // for
+// program hits the code above each time successfully, but never hits print statement.
+// I don't understand.Maybe loop keeps running?
 
+  printf("here");
   // add in the existing
   for (i=0; i<NUMLETTERS; ++i) {
     existingCounts[i] = newCounts[i] + existingCounts[i];
