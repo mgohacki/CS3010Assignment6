@@ -89,17 +89,23 @@ int insertWord(FILE *fp, char *word) {
             fread(&currentRecord, sizeof(WordRecord), 1, fp);
         }
 
-        // Update the next position of the last record in the linked list
-        currentRecord.nextpos = filesize;
-        fseek(fp, header.startPositions[index], SEEK_SET);
-        fwrite(&currentRecord, sizeof(WordRecord), 1, fp);
-
         // Write the new word record to the file
         WordRecord newRecord;
         strcpy(newRecord.word, lcword);
         newRecord.nextpos = 0;
         fseek(fp, 0, SEEK_END);
+        long currentPosition = ftell(fp);
         fwrite(&newRecord, sizeof(WordRecord), 1, fp);
+
+        // Update the next position of the second to last record in the linked list to the position of the last record
+        currentRecord.nextpos = currentPosition;
+        printf("%d",currentPosition);
+        printf("\n");
+        fseek(fp, header.startPositions[index], SEEK_SET);
+        fwrite(&currentRecord, sizeof(WordRecord), 1, fp);
+
+
+
     }
 
     return 0; // Successful insertion
