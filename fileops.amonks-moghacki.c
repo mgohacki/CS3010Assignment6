@@ -10,7 +10,6 @@ int insertWord(FILE *fp, char *word){
     if (checkWord(word) != 0) {
         return 1;
     }
-
     char lcword[MAXWORDLEN + 1];
     convertToLower(word, lcword);
     fseek(fp, 0, SEEK_END);
@@ -55,12 +54,12 @@ int insertWord(FILE *fp, char *word){
         WordRecord currentRecord;
         fread(&currentRecord, sizeof(WordRecord), 1, fp);
         while (currentRecord.nextpos != 0) { //read all records for given letter
-            currentPosition = currentRecord.nextpos;
             fseek(fp, currentRecord.nextpos, SEEK_SET);
             fread(&currentRecord, sizeof(WordRecord), 1, fp);
+            currentPosition = currentRecord.nextpos;
         }
         currentRecord.nextpos = filesize;
-        fseek(fp, currentPosition, SEEK_SET);
+        fseek(fp, header.startPositions[index], SEEK_SET);
         fwrite(&currentRecord, sizeof(WordRecord), 1, fp);
         WordRecord newRecord;
         strcpy(newRecord.word, lcword);
