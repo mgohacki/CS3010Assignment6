@@ -54,7 +54,6 @@ int insertWord(FILE *fp, char *word) {
     fseek(fp, 0, SEEK_SET);
     fread(&header, sizeof(FileHeader), 1, fp);
     int index = lcword[0] - 'a'; // Index of the first character
-
     // Update counts for the first letter of the word
     header.counts[index]++;
 
@@ -77,12 +76,10 @@ int insertWord(FILE *fp, char *word) {
         // Write the header back to the file
         fseek(fp, 0, SEEK_SET);
         fwrite(&header, sizeof(FileHeader), 1, fp);
-
         // Move to the start position for the current letter and read the current word record
         fseek(fp, header.startPositions[index], SEEK_SET);
         WordRecord currentRecord;
         fread(&currentRecord, sizeof(WordRecord), 1, fp);
-
         // Iterate to the end of the linked list for the current letter
         while (currentRecord.nextpos != 0) {
             fseek(fp, currentRecord.nextpos, SEEK_SET);
@@ -133,42 +130,40 @@ int countWords(FILE *fp, char letter, int *count) {
     return 0; // Successful count
 }
 
-// Function to get a word at a specific index starting with a specific letter
 char *getWord(FILE *fp, char letter, int index) {
     FileHeader header;
-
-    // Read the file header
     fseek(fp, 0, SEEK_SET);
     fread(&header, sizeof(FileHeader), 1, fp);
 
-    // Get the index corresponding to the input letter
     int letterIndex = letter - 'a';
-
-    // Check if the requested index is within bounds
     if (header.counts[letterIndex] < index + 1) {
-        return NULL; // Index out of bounds
-    } else {
-        WordRecord word;
-
-        // Move to the start position for the current letter
-        fseek(fp, header.startPositions[letterIndex], SEEK_SET);
-
-        // Iterate to the desired index in the linked list
-        for (int i = 0; i < index; i++) {
-            fread(&word, sizeof(WordRecord), 1, fp);
-            fseek(fp, word.nextpos, SEEK_SET);
-        }
-
-        // Read the word record at the desired index
-        fread(&word, sizeof(WordRecord), 1, fp);
-
-        // Allocate memory for the final word and copy the word to it
-        char *finalWord = malloc(strlen(word.word) + 1);
-        strcpy(finalWord, word.word);
-
-        return finalWord; // Return the final word
+        return NULL;
     }
+
+    fseek(fp, header.startPositions[letterIndex], SEEK_SET);
+    WordRecord wordRecord;
+
+    for (int i = 0; i < index; ++i) {
+
+        fread(&wordRecord, sizeof(WordRecord), 1, fp);
+
+        if (wordRecord.nextpos == 0 && i < index - 1) {
+            // Unexpected end of linked list before reaching the desired index
+            printf("Unexpected end of linked list for letter '%c' at index %d\n", letter, index);
+            return NULL;
+        }
+        fseek(fp, wordRecord.nextpos, SEEK_SET);
+    }
+
+    fread(&wordRecord, sizeof(WordRecord), 1, fp);
+
+    char *finalWord = malloc(strlen(wordRecord.word) + 1);
+    strcpy(finalWord, wordRecord.word);
+
+    return finalWord;
 }
+
+
 
 //--------------------------------------------------------
 // Return 1 if any characters are non-alphabetic;
