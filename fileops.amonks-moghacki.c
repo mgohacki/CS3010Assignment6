@@ -48,6 +48,8 @@ int insertWord(FILE *fp, char *word){
         fwrite(&record, sizeof(WordRecord), 1, fp);
 
     } else { //Not first word for the letter
+        fseek(fp, 0, SEEK_SET);
+        fwrite(&header, sizeof(FileHeader), 1, fp);
         long currentPosition = sizeof(FileHeader);
         fseek(fp, header.startPositions[index], SEEK_SET);
         WordRecord currentRecord;
@@ -89,15 +91,12 @@ int countWords(FILE *fp, char letter, int *count){
     FileHeader header;
     fseek(fp, 0,SEEK_SET);
     fread(&header, sizeof(FileHeader), 1, fp);
+    if (!checkWord(&letter)){
+        return 1;
+    }
     int index = letter - 'a';
-    if (header.counts[index] < 0){
-        printf("ERROR: header.counts[] less than 0");
-        return 0;
-    }
-    else{
-        *count = header.counts[index];
-        return 0;
-    }
+    *count = header.counts[index];
+    return 0;
 }
 
 char *getWord(FILE *fp, char letter, int index){
@@ -109,7 +108,6 @@ char *getWord(FILE *fp, char letter, int index){
     fread(&header, sizeof(FileHeader), 1, fp);
 //    3. if header.counts[13] less than two, then there is no second word starting with 'n'
     int letterIndex = letter - 'a';
-    printf("\n%d\n", index);
     if (header.counts[letterIndex] < index + 1){
         return NULL;
     }
@@ -130,7 +128,6 @@ char *getWord(FILE *fp, char letter, int index){
         fread(&word, sizeof(WordRecord), 1, fp);
         char *finalWord = malloc(strlen(word.word) + 1);
         strcpy(finalWord, word.word);
-        printf("Word: %s\n", finalWord);
         return finalWord;
     }
 }
