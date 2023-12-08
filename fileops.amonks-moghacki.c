@@ -2,6 +2,7 @@
 // Created by Miro Gohacki on 12/6/23.
 //
 #include "fileops.amonks-mgohacki.h"
+
 int insertWord(FILE *fp, char *word){
     if (word == NULL || word[0] == '\0') {
         return 1;
@@ -85,14 +86,17 @@ int insertWord(FILE *fp, char *word){
 }
 
 int countWords(FILE *fp, char letter, int *count){
-    FileHeader *header;
+    FileHeader header;
     fseek(fp, 0,SEEK_SET);
-    fread(header, sizeof(FileHeader), 1, fp);
-    if (header->counts[letter] < 0){
+    fread(&header, sizeof(FileHeader), 1, fp);
+    int index = letter - 'a';
+    if (header.counts[index] < 0){
+        printf("ERROR: header.counts[] less than 0");
         return 0;
     }
     else{
-        return header->counts[letter];
+        *count = header.counts[index];
+        return 0;
     }
 }
 
@@ -100,30 +104,34 @@ char *getWord(FILE *fp, char letter, int index){
 //    Suppose I want to read the second word starting with 'n'
 //    1. if the file is empty, there are no words starting with 'n'
 //    2. if the file is not empty, then read the header and look at header.counts[13]
-    FileHeader *header;
+    FileHeader header;
     fseek(fp, 0,SEEK_SET);
-    fread(header, sizeof(FileHeader), 1, fp);
+    fread(&header, sizeof(FileHeader), 1, fp);
 //    3. if header.counts[13] less than two, then there is no second word starting with 'n'
-    if (header->counts[letter] < index){
+    int letterIndex = letter - 'a';
+    printf("\n%d\n", index);
+    if (header.counts[letterIndex] < index + 1){
         return NULL;
     }
 //    4. otherwise, look at header.startPositions[13]
     else{
-
         //    5. suppose that value is p : then fseek() to p , and read the WordRecord structure starting
         //    at this position
-        fseek(fp, header->startPositions[letter], SEEK_SET);
-        for (int i =0; i< index;i++){
-            WordRecord* word;
+        WordRecord word;
+        fseek(fp, header.startPositions[letterIndex], SEEK_SET);
+        for (int i = 0; i < index;i++){
+
             //    6. get the nextpos value from the record
             fread(&word, sizeof(WordRecord), 1, fp);
             //    7. seek to nextpos
-            fseek(fp, word->nextpos, SEEK_SET);
+            fseek(fp, word.nextpos, SEEK_SET);
         }
         //    8. read the record at that position and get the word from that record
-        WordRecord* word;
         fread(&word, sizeof(WordRecord), 1, fp);
-        return word->word;
+        char *finalWord = malloc(strlen(word.word) + 1);
+        strcpy(finalWord, word.word);
+        printf("Word: %s\n", finalWord);
+        return finalWord;
     }
 }
 
