@@ -282,7 +282,7 @@ int main() {
 
   rc = checkFile(filename, existingWords, existingCounts);
   if (rc != 0) {
-    printf("checkFile() failed\n");
+    printf("checkFile() 1 failed\n");
     return 0;
   }
 
