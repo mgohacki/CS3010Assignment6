@@ -1,5 +1,5 @@
 //
-// Created by Miro Gohacki on 12/6/23.
+// Created by Miro Gohacki and Adrien Monks on 12/6/23.
 //
 
 #ifndef CS3010ASSIGNMENT6_FILEOPS_AMONKS_MGOHACKI_H
