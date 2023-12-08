@@ -6,6 +6,13 @@ int insertWord(FILE *fp, char *word){
     if (word == NULL || word[0] == '\0') {
         return 1;
     }
+    if (checkWord(word) != 0) {
+        // The word contains non-alphabetic characters
+        return 1;
+    }
+
+    char lcword[MAXWORDLEN + 1];
+    convertToLower(word, lcword);
     fseek(fp, 0, SEEK_END);
     long filesize = ftell(fp);
     FileHeader header;
@@ -14,12 +21,12 @@ int insertWord(FILE *fp, char *word){
             header.counts[i] = 0;
             header.startPositions[i] = 0;
         }
-        header.counts[word[0] - 'a'] = 1;
-        header.startPositions[word[0] - 'a'] = sizeof(FileHeader);
+        header.counts[lcword[0] - 'a'] = 1;
+        header.startPositions[lcword[0] - 'a'] = sizeof(FileHeader);
         fseek(fp, 0, SEEK_SET);
         fwrite(&header, sizeof(FileHeader), 1, fp);
         WordRecord record;
-        strcpy(record.word, word);
+        strcpy(record.word, lcword);
         record.nextpos = 0;
         fseek(fp, sizeof(FileHeader), SEEK_SET);
         fwrite(&record, sizeof(WordRecord), 1, fp);
@@ -28,14 +35,14 @@ int insertWord(FILE *fp, char *word){
     // File is not empty
     fseek(fp, 0, SEEK_SET);
     fread(&header, sizeof(FileHeader), 1, fp);
-    int index = word[0] - 'a'; //index of first char
+    int index = lcword[0] - 'a'; //index of first char
     header.counts[index]++;
     if (header.counts[index] == 1) {// If this is the first word for this letter
         header.startPositions[index] = filesize;
         fseek(fp, 0, SEEK_SET);
         fwrite(&header, sizeof(FileHeader), 1, fp);
         WordRecord record;
-        strcpy(record.word, word);
+        strcpy(record.word, lcword);
         record.nextpos = 0;
         fseek(fp, 0, SEEK_END);
         fwrite(&record, sizeof(WordRecord), 1, fp);
@@ -54,7 +61,7 @@ int insertWord(FILE *fp, char *word){
         fseek(fp, currentPosition, SEEK_SET);
         fwrite(&currentRecord, sizeof(WordRecord), 1, fp);
         WordRecord newRecord;
-        strcpy(newRecord.word, word);
+        strcpy(newRecord.word, lcword);
         newRecord.nextpos = 0;
         fseek(fp, 0, SEEK_END);
         fwrite(&newRecord, sizeof(WordRecord), 1, fp);

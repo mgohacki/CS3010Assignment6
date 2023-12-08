@@ -223,12 +223,12 @@ int main() {
   int existingCounts[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   newfileFlag = 1;
+
   rc = writeTestOne(filename, existingWords, existingCounts, newfileFlag);
   if (rc != 0) {
     printf("writeTestOne() failed\n");
     return 8;
   }
-
   rc = checkFile(filename, existingWords, existingCounts);
   if (rc != 0) {
     printf("checkFile() failed\n");
