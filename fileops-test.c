@@ -11,9 +11,6 @@
 
 // header will have 26 longs + 26 longs (one for each letter)
 
-int checkWord(char *);
-int convertToLower(char *, char *);
-
 //---------------------------------------------------------------
 // - write "Nineveh" to the file (as "nineveh")
 // - write "kerfuffle" to the file
